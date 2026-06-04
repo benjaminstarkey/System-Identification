@@ -46,3 +46,15 @@ grid on
 % Conclusions:
 % Step input not enough freq.
 % Need more frequency content, for better excitation
+
+%% Data Logging
+
+data.t = t;
+data.u = u_step;
+data.y = theta_meas;
+data.dt = dt;
+
+data.experiment.type = "Step";
+data.experiment.date = datetime;
+
+save('../data/step.mat', 'data');
