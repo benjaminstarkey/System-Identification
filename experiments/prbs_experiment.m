@@ -46,3 +46,14 @@ xlabel('Time (s)')
 ylabel('Position (rad)')
 grid on
 
+%% Data Logging
+
+data.t = t;
+data.u = u_PRBS;
+data.y = theta_meas;
+data.dt = dt;
+
+data.experiment.type = "PRBS";
+data.experiment.date = datetime;
+
+save('../data/prbs.mat', 'data');
