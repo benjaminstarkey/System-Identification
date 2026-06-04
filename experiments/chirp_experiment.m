@@ -45,3 +45,14 @@ xlabel('Time (s)')
 ylabel('Position (rad)')
 grid on
 
+%% Data Logging
+
+data.t = t;
+data.u = u_chirp;
+data.y = theta_meas;
+data.dt = dt;
+
+data.experiment.type = "Chirp";
+data.experiment.date = datetime;
+
+save('../data/chirp.mat', 'data');
