@@ -8,7 +8,7 @@ Tf = 10;
 t = 0:dt:Tf;
 
 % Input Signal
-u_step = 5*ones(1, length(t)); % constant 5V cmd
+u_step = [zeros(1, 10), 5*ones(1, length(t)-10)]; % step 5V cmd
 
 % Initial Conditions
 x0 = [0; 0];
