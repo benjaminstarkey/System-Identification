@@ -28,20 +28,23 @@ end
 
 % Add noise to nominal angular position output meas.
 theta = x_t(1,:);
-theta_meas = theta + 40*randn(1, length(theta));
+theta_meas = theta + 0.1*randn(1, length(theta));
+
+omega = x_t(2,:);
+omega_meas = omega + 0.1*randn(1, length(omega));
 
 % Plot to see inputs/outputs
 figure
-plot(t,u_step)
-xlabel('Time (s)')
-ylabel('Voltage (V)')
+hold on
 grid on
 
-figure
-plot(t,theta_meas)
+plot(t, u_step)
+plot(t, theta_meas)
+plot(t, omega_meas)
+
 xlabel('Time (s)')
-ylabel('Position (rad)')
-grid on
+ylabel('Amplitude (V)')
+legend('Input', 'Pos.', 'Vel.')
 
 % Conclusions:
 % Step input not enough freq.
@@ -51,7 +54,7 @@ grid on
 
 data.t = t;
 data.u = u_step;
-data.y = theta_meas;
+data.y = omega_meas;
 data.dt = dt;
 
 data.experiment.type = "Step";
