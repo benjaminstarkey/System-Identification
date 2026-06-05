@@ -9,7 +9,7 @@ Tf = 10;
 t = 0:dt:Tf;
 
 amps = [0.2, 2, 6];
-names = ['low', 'med', 'high'];
+names = ["low", "med", "high"];
 
 data = struct();
 
@@ -49,6 +49,7 @@ data.(name).t = t;
 data.(name).u = u_chirp;
 data.(name).y = omega_meas;
 data.(name).dt = dt;
+data.(name).noise = [0.4, 0.1];
 
 data.(name).amp = amp;
 
