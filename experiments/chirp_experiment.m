@@ -30,7 +30,7 @@ end
 
 % Add noise to nominal angular position output meas.
 theta = x_t(1,:);
-theta_meas = theta + 0.1*randn(1, length(theta));
+theta_meas = theta + 0.4*randn(1, length(theta));
 
 omega = x_t(2,:);
 omega_meas = omega + 0.1*randn(1, length(omega));
@@ -59,3 +59,4 @@ data.experiment.type = "Chirp";
 data.experiment.date = datetime;
 
 save('../data/chirp.mat', 'data');
+disp('Logged Chirp Data')
