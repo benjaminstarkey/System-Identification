@@ -23,6 +23,8 @@ step_poles = pole(step_sys)
 chirp_poles = pole(chirp_sys)
 prbs_poles = pole(prbs_sys)
 
+%%
 figure
 % compare(data_prbs, prbs_sys)
-compare(data_chirp, prbs_sys)
+% compare(data_chirp, prbs_sys)
+compare(data_step, prbs_sys)
