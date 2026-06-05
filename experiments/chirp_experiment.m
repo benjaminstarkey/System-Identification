@@ -2,16 +2,23 @@
 clear
 clc
 
+disp('Running Chirp Signal Input')
 dt = 0.01;
 Tf = 10;
 
 t = 0:dt:Tf;
 
-u_chirp = 2*chirp(t, 0.1, t(end), 10); % increases frequency from 0.1 to 10 Hz
-disp('Running Chirp Signal Input')
+amps = [0.2, 2, 6];
+names = ['low', 'med', 'high'];
 
+data = struct();
 
-%% Experiment using Input Signal
+for i = 1:length(amps)
+
+% Input Signal
+amp = amps(i);
+u_chirp = amp*chirp(t, 0.1, t(end), 10); % increases frequency from 0.1 to 10 Hz
+
 % Initial Conditions
 x0 = [0; 0];
 
@@ -35,28 +42,33 @@ theta_meas = theta + 0.4*randn(1, length(theta));
 omega = x_t(2,:);
 omega_meas = omega + 0.1*randn(1, length(omega));
 
-% Plot to see inputs/outputs
-figure
-hold on
-grid on
+% Store in structure
+name = names(i);
 
-plot(t, u_chirp)
-plot(t, theta_meas)
-plot(t, omega_meas)
+data.(name).t = t;
+data.(name).u = u_chirp;
+data.(name).y = omega_meas;
+data.(name).dt = dt;
 
-xlabel('Time (s)')
-ylabel('Amplitude (V)')
-legend('Input', 'Pos.', 'Vel.')
+data.(name).amp = amp;
 
-%% Data Logging
+end
 
-data.t = t;
-data.u = u_chirp;
-data.y = omega_meas;
-data.dt = dt;
-
-data.experiment.type = "Chirp";
-data.experiment.date = datetime;
-
+% Data Logging
 save('../data/chirp.mat', 'data');
 disp('Logged Chirp Data')
+
+
+
+%% Plotting
+% figure
+% hold on
+% grid on
+% 
+% plot(t, u_chirp)
+% plot(t, theta_meas)
+% plot(t, omega_meas)
+% 
+% xlabel('Time (s)')
+% ylabel('Amplitude (V)')
+% legend('Input', 'Pos.', 'Vel.')
