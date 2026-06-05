@@ -26,34 +26,43 @@ for k = 1:length(t)-1
 
     [~, xtemp] = ode45(@(t_in,x_in) actuator_truth_model(t_in, x_in, u_PRBS(k)), t_k, x_t(:,k));
 
-    x_t(:, k+1) = xtemp(end, 1);
+    x_t(:, k+1) = xtemp(end, :)';
 end
 
 % Add noise to nominal angular position output meas.
 theta = x_t(1,:);
-theta_meas = theta + 10*randn(1, length(theta));
+theta_meas = theta + 0.4*randn(1, length(theta));
+
+omega = x_t(2,:);
+omega_meas = omega + 0.1*randn(1, length(omega));
+
+
 
 % Plot to see inputs/outputs
 figure
-plot(t, u_PRBS)
-xlabel('Time (s)')
-ylabel('Voltage (V)')
+hold on
 grid on
 
-figure
+plot(t, u_PRBS)
 plot(t, theta_meas)
+plot(t, omega_meas)
+
 xlabel('Time (s)')
-ylabel('Position (rad)')
-grid on
+ylabel('Amplitude (V)')
+legend('Input', 'Pos.', 'Vel.')
+
+
 
 %% Data Logging
 
 data.t = t;
 data.u = u_PRBS;
-data.y = theta_meas;
+% data.y = theta_meas;
+data.y = omega_meas;
 data.dt = dt;
 
 data.experiment.type = "PRBS";
 data.experiment.date = datetime;
 
 save('../data/prbs.mat', 'data');
+disp('Logged PRBS Data')
