@@ -7,7 +7,7 @@ Tf = 10;
 
 t = 0:dt:Tf;
 
-u_chirp = 2*chirp(t, 0.1, t(end), 10); % increases frequency from 0.1 to 5 Hz
+u_chirp = 2*chirp(t, 0.1, t(end), 10); % increases frequency from 0.1 to 10 Hz
 disp('Running Chirp Signal Input')
 
 
@@ -25,7 +25,7 @@ for k = 1:length(t)-1
 
     [~, xtemp] = ode45(@(t_in,x_in) actuator_truth_model(t_in, x_in, u_chirp(k)), t_k, x_t(:,k));
 
-    x_t(:, k+1) = xtemp(end, 1);
+    x_t(:, k+1) = xtemp(end, :)';
 end
 
 % Add noise to nominal angular position output meas.

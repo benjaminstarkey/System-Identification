@@ -23,7 +23,7 @@ for k = 1:length(t)-1
 
     [~, xtemp] = ode45(@(t_in,x_in) actuator_truth_model(t_in, x_in, u_step(k)), t_k, x_t(:,k));
 
-    x_t(:, k+1) = xtemp(end, 1);
+    x_t(:, k+1) = xtemp(end, :)';
 end
 
 % Add noise to nominal angular position output meas.
