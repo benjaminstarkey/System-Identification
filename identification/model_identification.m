@@ -23,7 +23,7 @@ for i = 1:length(names)
 end
 
 %% Select Training Dataset
-disp('Training Models...')
+disp('Training Models using PRBS 2V Data...')
 z_train = prbs_data.med;
 
 orders = 2:3; % parameter to test different orders
@@ -43,15 +43,15 @@ end
 
 disp('Trained Linear Models Successfully')
 
-% NONLINEAR MODEL TRAINING
-nl_models = cell(1, length(orders));
-
-for i = 1:length(orders)
-    n = orders(i);
-    nl_models{i} = nlhw(z_train, [1 n 1]);
-end
-
-disp('Trained Nonlinear Models Successfully')
+% % NONLINEAR MODEL TRAINING
+% nl_models = cell(1, length(orders));
+% 
+% for i = 1:length(orders)
+%     n = orders(i);
+%     nl_models{i} = nlhw(z_train, [1 n 1]);
+% end
+% 
+% disp('Trained Nonlinear Models Successfully')
 
 %% Evaluate on Training Data and Experimental Data
 trained_models = [tf_models, ss_models];
