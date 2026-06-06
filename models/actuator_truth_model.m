@@ -11,7 +11,7 @@ Kt = 0.1; % voltage gain
 Fc = 0.02; % coulomb friction
 
 Fs = 0.035; % stribeck friction (higher than coulomb)
-vs = 0.05; % stribeck velocity scale
+vs = 0.1; % stribeck velocity scale
 V_max = 5; % for saturation
 
 % Assign states
