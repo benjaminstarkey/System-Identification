@@ -26,7 +26,7 @@ end
 disp('Training Models using PRBS 2V Data...')
 z_train = prbs_data.med;
 
-orders = 2:3; % parameter to test different orders
+orders = 1:3; % parameter to test different orders
 
 tf_models = cell(1, length(orders));
 ss_models = cell(1, length(orders));
