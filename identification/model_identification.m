@@ -167,3 +167,16 @@ title('Input Analysis')
 xlabel('Dataset')
 ylabel('Model Type')
 
+
+%% Gray Box Parameter Identification
+
+% Initial Parameter Guesses [b, J, Kt]
+params_guess = [0.005; 0.01; 0.12];
+params_names = {'b'; 'J'; 'Kt'};
+
+grey_model = idgrey(@motor_grey_model, params_guess, 'c');
+grey_est_model = greyest(z_train, grey_model);
+%%
+[~, grey_fit_val] = compare(prbs_data.high, grey_est_model)
+
+
