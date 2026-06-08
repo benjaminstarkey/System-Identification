@@ -168,15 +168,55 @@ xlabel('Dataset')
 ylabel('Model Type')
 
 
-%% Gray Box Parameter Identification
+%% Gray Box Linear Parameter Estimation
 
 % Initial Parameter Guesses [b, J, Kt]
 params_guess = [0.005; 0.01; 0.12];
 params_names = {'b'; 'J'; 'Kt'};
 
-grey_model = idgrey(@motor_grey_model, params_guess, 'c');
-grey_est_model = greyest(z_train, grey_model);
+grey_lin_model = idgrey(@motor_grey_model, params_guess, 'c');
+grey_lin_est_model = greyest(z_train, grey_lin_model);
 %%
-[~, grey_fit_val] = compare(prbs_data.high, grey_est_model)
+[~, grey_fit_val] = compare(prbs_data.high, grey_lin_est_model)
 
+%% Grey Nonlinear Parameter Estimation
 
+params_guess = {0.005; 0.01; 0.12; 0.03; 0.04; 0.06};
+params_names = {'b'; 'J'; 'Kt'; 'Fc'; 'Fs'; 'vs'};
+
+grey_nonlin_model = idnlgrey(@motor_grey_nonlin_model,[1 1 1],params_guess, 0);
+
+% Settings to help solver
+grey_nonlin_model.Algorithm.SimulationOptions.Solver = 'ode15s';
+grey_nonlin_model.Algorithm.Display = 'on';
+
+grey_nonlin_model.Parameters(1).Minimum = 0.0001; % b min
+grey_nonlin_model.Parameters(2).Minimum = 0.001;  % J min
+grey_nonlin_model.Parameters(3).Minimum = 0.01;   % Kt min
+grey_nonlin_model.Parameters(4).Minimum = 0.001;  % Fs min
+grey_nonlin_model.Parameters(5).Minimum = 0.001;  % Fc min
+grey_nonlin_model.Parameters(6).Minimum = 0.01;   % vs min
+
+grey_nonlin_model.Parameters(1).Name = 'b';
+grey_nonlin_model.Parameters(2).Name = 'J';
+grey_nonlin_model.Parameters(3).Name = 'Kt';
+grey_nonlin_model.Parameters(4).Name = 'Fc';
+grey_nonlin_model.Parameters(5).Name = 'Fs';
+grey_nonlin_model.Parameters(6).Name = 'vs';
+
+grey_nonlin_est_model = nlgreyest(z_train, grey_nonlin_model);
+%% Parameter Validation Table
+
+est_names = {grey_nonlin_est_model.Parameters.Name}';
+est_values = [grey_nonlin_est_model.Parameters.Value]';
+
+est_cov = grey_nonlin_est_model.Report.Parameters.FreeParCovariance;
+est_stdev = sqrt(diag(est_cov));
+
+true_values = [0.004; 0.012; 0.1; 0.02; 0.035; 0.1];
+percent_error = abs((est_values - true_values) ./ true_values) * 100;
+
+summary_table = table(est_names, true_values, round(est_values,3), round(est_stdev,3), round(percent_error,3), ...
+    'VariableNames', {'Parameter', 'True_Value', 'Identified_Value', 'Std_Deviation', 'Percent_Error'});
+
+disp(summary_table);
