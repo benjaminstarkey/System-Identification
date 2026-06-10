@@ -12,7 +12,7 @@ load prbs.mat
 prbs = data;
 
 
-%% Regime Looping
+%% Data Input Amp and Signal Processing
 names = fieldnames(stepp);
 
 for i = 1:length(names)
@@ -22,7 +22,7 @@ for i = 1:length(names)
     prbs_data.(label) = iddata(prbs.(label).y(:), prbs.(label).u(:), prbs.(label).dt);
 end
 
-%% Select Training Dataset
+%% Select Training Dataset and Generate Models
 disp('Training Models using PRBS 2V Data...')
 z_train = prbs_data.med;
 
@@ -82,7 +82,7 @@ title('Chirp Data Validity Comparison')
 [~, fit.exp.chirp] = compare(z_exp_chirp, trained_models{:});
 
 
-%% PRBS Amplitude Nonlinear Analysis
+%% PRBS Amplitude Analysis
 data_sets = {z_train, prbs_data.low, prbs_data.high};
 data_names = ["PRBS 2V (Training)", "PRBS 0.2V", "PRBS 6V"];
 
@@ -126,7 +126,7 @@ ylabel('Model Type')
 
 
 
-%% Input Nonlinear Analysis
+%% Input Type Analysis
 data_sets = {z_train, step_data.med, chirp_data.med};
 data_names = ["PRBS 2V (Training)", "Step 2V", "Chirp 2V"];
 
@@ -168,7 +168,7 @@ xlabel('Dataset')
 ylabel('Model Type')
 
 
-%% Gray Box Linear Parameter Estimation
+%% Grey Box Linear Parameter Estimation
 
 % Initial Parameter Guesses [b, J, Kt]
 params_guess = [0.005; 0.01; 0.12];
@@ -177,7 +177,7 @@ params_names = {'b'; 'J'; 'Kt'};
 grey_lin_model = idgrey(@motor_grey_model, params_guess, 'c');
 grey_lin_est_model = greyest(z_train, grey_lin_model);
 %%
-[~, grey_fit_val] = compare(prbs_data.high, grey_lin_est_model)
+[~, grey_fit_val] = compare(prbs_data.high, grey_lin_est_model);
 
 %% Grey Nonlinear Parameter Estimation
 
@@ -191,11 +191,11 @@ grey_nonlin_model.Algorithm.SimulationOptions.Solver = 'ode15s';
 grey_nonlin_model.Algorithm.Display = 'on';
 
 grey_nonlin_model.Parameters(1).Minimum = 0.0001; % b min
-grey_nonlin_model.Parameters(2).Minimum = 0.001;  % J min
-grey_nonlin_model.Parameters(3).Minimum = 0.01;   % Kt min
-grey_nonlin_model.Parameters(4).Minimum = 0.001;  % Fs min
-grey_nonlin_model.Parameters(5).Minimum = 0.001;  % Fc min
-grey_nonlin_model.Parameters(6).Minimum = 0.01;   % vs min
+grey_nonlin_model.Parameters(2).Minimum = 0.001; % J min
+grey_nonlin_model.Parameters(3).Minimum = 0.01; % Kt min
+grey_nonlin_model.Parameters(4).Minimum = 0.001; % Fs min
+grey_nonlin_model.Parameters(5).Minimum = 0.001; % Fc min
+grey_nonlin_model.Parameters(6).Minimum = 0.01; % vs min
 
 grey_nonlin_model.Parameters(1).Name = 'b';
 grey_nonlin_model.Parameters(2).Name = 'J';
