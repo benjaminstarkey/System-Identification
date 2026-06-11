@@ -181,30 +181,47 @@ grey_lin_est_model = greyest(z_train, grey_lin_model);
 
 %% Grey Nonlinear Parameter Estimation
 
+% z_train = merge(chirp_data.med, prbs_data.med);
+z_train = prbs_data.med;
+
 params_guess = {0.005; 0.01; 0.12; 0.03; 0.04; 0.06};
 params_names = {'b'; 'J'; 'Kt'; 'Fc'; 'Fs'; 'vs'};
 
-grey_nonlin_model = idnlgrey(@motor_grey_nonlin_model,[1 1 1],params_guess, 0);
+grey_nonlin_model = idnlgrey(@motor_grey_nonlin_model,[1 1 1],params_guess,0);
+grey_nonlin_model.Algorithm.Display = 'on';
 
 % Settings to help solver
 grey_nonlin_model.Algorithm.SimulationOptions.Solver = 'ode15s';
-grey_nonlin_model.Algorithm.Display = 'on';
-
-grey_nonlin_model.Parameters(1).Minimum = 0.0001; % b min
-grey_nonlin_model.Parameters(2).Minimum = 0.001; % J min
-grey_nonlin_model.Parameters(3).Minimum = 0.01; % Kt min
-grey_nonlin_model.Parameters(4).Minimum = 0.001; % Fs min
-grey_nonlin_model.Parameters(5).Minimum = 0.001; % Fc min
-grey_nonlin_model.Parameters(6).Minimum = 0.01; % vs min
 
 grey_nonlin_model.Parameters(1).Name = 'b';
-grey_nonlin_model.Parameters(2).Name = 'J';
-grey_nonlin_model.Parameters(3).Name = 'Kt';
-grey_nonlin_model.Parameters(4).Name = 'Fc';
-grey_nonlin_model.Parameters(5).Name = 'Fs';
-grey_nonlin_model.Parameters(6).Name = 'vs';
+grey_nonlin_model.Parameters(1).Minimum = 0.0001;
+grey_nonlin_model.Parameters(1).Maximum = 0.01;
 
+grey_nonlin_model.Parameters(2).Name = 'J';
+grey_nonlin_model.Parameters(2).Minimum = 0.001;
+grey_nonlin_model.Parameters(2).Maximum = 0.1;
+
+grey_nonlin_model.Parameters(3).Name = 'Kt';
+grey_nonlin_model.Parameters(3).Minimum = 0.01;
+grey_nonlin_model.Parameters(3).Maximum = 1;
+
+grey_nonlin_model.Parameters(4).Name = 'Fc';
+grey_nonlin_model.Parameters(4).Minimum = 0.001;
+grey_nonlin_model.Parameters(4).Maximum = 0.1;
+
+grey_nonlin_model.Parameters(5).Name = 'Fs';
+grey_nonlin_model.Parameters(5).Minimum = 0.001;
+grey_nonlin_model.Parameters(5).Maximum = 0.1;
+
+grey_nonlin_model.Parameters(6).Name = 'vs';
+grey_nonlin_model.Parameters(6).Minimum = 0.01;
+grey_nonlin_model.Parameters(6).Maximum = 1;
+
+compare(z_train, grey_nonlin_model)
+
+fprintf('Starting grey estimation. This may take time, but should not hang...\n');
 grey_nonlin_est_model = nlgreyest(z_train, grey_nonlin_model);
+
 %% Parameter Validation Table
 
 est_names = {grey_nonlin_est_model.Parameters.Name}';
