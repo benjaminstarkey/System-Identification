@@ -169,6 +169,32 @@ title('Input Analysis')
 xlabel('Dataset')
 ylabel('Model Type')
 
+%% Industry Style Heatmap
+train_data = {prbs_data.low, prbs_data.med, prbs_data.high};
+validation_data = {prbs_data.low, prbs_data.med, prbs_data.high};
+
+labels = {'Low (0.5V)', 'Medium (2V)', 'High (6V)'};
+fit_table = zeros(3,3);
+
+for k = 1:length(train_data)
+    tf_model = tfest(train_data{k}, 2, 0); % train 2nd order TF by input regime
+
+    for m = 1:length(validation_data)
+        [~, fit_val] = compare(validation_data{m}, tf_model);
+        fit_table(m, k) = fit_val; 
+    end
+
+end
+
+figure
+heatmap(labels, labels, fit_table);
+colormap(parula)
+clim([0, 100])
+
+title('Linear TF Operating Regime Cross-Validation')
+xlabel('Validation Regime')
+ylabel('Training Regime')
+
 
 %% Grey Box Linear Parameter Estimation
 
