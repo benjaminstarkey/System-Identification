@@ -188,7 +188,7 @@ end
 
 figure
 heatmap(labels, labels, fit_table, 'FontSize', 14);
-colormap(parula)
+colormap([linspace(0.9, 0.0, 256)', linspace(0.95, 0.2, 256)', linspace(1.0, 0.5, 256)'])
 clim([0, 100])
 
 title('Linear TF Operating Regime Cross-Validation')
@@ -291,9 +291,9 @@ legend('6V Chirp Exp Data', 'Nonlinear Grey Model Estimation')
 
 %% NLGREY Cross-Val Heatmap
 model_compare = {prbs_data.med, grey_nonlin_est_model};
-input_regime = {step_data.low, chirp_data.med, prbs_data.high};
+input_regime = {step_data.low, prbs_data.low, chirp_data.med, prbs_data.high};
 
-horz_labels = {'Low Step (0.5V)', 'Medium Chirp (2V)', 'High PRBS (6V)'};
+horz_labels = {'Low Step (0.5V)', 'Low PRBS (0.5V)', 'Medium Chirp (2V)', 'High PRBS (6V)'};
 vert_labels = {'Linear Model (2V PRBS)', 'NL Grey Model'};
 fit_table = zeros(2,3);
 
@@ -308,7 +308,7 @@ end
 
 figure
 heatmap(horz_labels, vert_labels, fit_table, 'FontSize', 14);
-colormap(parula)
+colormap([linspace(0.9, 0.0, 256)', linspace(0.95, 0.2, 256)', linspace(1.0, 0.5, 256)']);
 clim([0, 100])
 
 title('Linear TF vs. Nonlinear Grey Model Cross Validation')
