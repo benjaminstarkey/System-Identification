@@ -67,7 +67,9 @@ title('Training Data Validity Comparison')
 z_exp_step = step_data.med;
 
 figure
-compare(z_exp_step, trained_models{:});
+opt = compareOptions;
+opt.InitialCondition = 'z';
+compare(z_exp_step, trained_models{:}, opt);
 title('Step Data Validity Comparison')
 
 [~, fit.exp.step] = compare(z_exp_step, trained_models{:});
@@ -84,7 +86,7 @@ title('Chirp Data Validity Comparison')
 
 %% PRBS Amplitude Analysis
 data_sets = {z_train, prbs_data.low, prbs_data.high};
-data_names = ["PRBS 2V (Training)", "PRBS 0.2V", "PRBS 6V"];
+data_names = ["PRBS 2V (Training)", "PRBS 0.5V", "PRBS 6V"];
 
 fit_table = zeros(length(trained_models), length(data_sets));
 
@@ -182,7 +184,8 @@ grey_lin_est_model = greyest(z_train, grey_lin_model);
 %% Grey Nonlinear Parameter Estimation
 
 % z_train = merge(chirp_data.med, prbs_data.med);
-z_train = prbs_data.med;
+% z_train = prbs_data.med;
+z_train = merge( step_data.med, chirp_data.low, prbs_data.med);
 
 params_guess = {0.005; 0.01; 0.12; 0.03; 0.04; 0.06};
 params_names = {'b'; 'J'; 'Kt'; 'Fc'; 'Fs'; 'vs'};
@@ -217,9 +220,8 @@ grey_nonlin_model.Parameters(6).Name = 'vs';
 grey_nonlin_model.Parameters(6).Minimum = 0.01;
 grey_nonlin_model.Parameters(6).Maximum = 1;
 
-compare(z_train, grey_nonlin_model)
 
-fprintf('Starting grey estimation. This may take time, but should not hang...\n');
+
 grey_nonlin_est_model = nlgreyest(z_train, grey_nonlin_model);
 
 %% Parameter Validation Table
@@ -237,3 +239,13 @@ summary_table = table(est_names, true_values, round(est_values,3), round(est_std
     'VariableNames', {'Parameter', 'True_Value', 'Identified_Value', 'Std_Deviation', 'Percent_Error'});
 
 disp(summary_table);
+
+%%
+figure()
+compare(chirp_data.med, grey_nonlin_est_model)
+
+figure()
+compare(chirp_data.low, grey_nonlin_est_model)
+
+figure()
+compare(chirp_data.high, grey_nonlin_est_model)
