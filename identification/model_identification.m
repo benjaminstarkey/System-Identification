@@ -183,11 +183,10 @@ grey_lin_est_model = greyest(z_train, grey_lin_model);
 
 %% Grey Nonlinear Parameter Estimation
 
-% z_train = merge(chirp_data.med, prbs_data.med);
-% z_train = prbs_data.med;
-z_train = merge( step_data.med, chirp_data.low, prbs_data.med);
+z_train = merge(step_data.med, chirp_data.low, prbs_data.med);
 
-params_guess = {0.005; 0.01; 0.12; 0.03; 0.04; 0.06};
+
+params_guess = {0.005; 0.01; 0.2; 0.04; 0.045; 0.06};
 params_names = {'b'; 'J'; 'Kt'; 'Fc'; 'Fs'; 'vs'};
 
 grey_nonlin_model = idnlgrey(@motor_grey_nonlin_model,[1 1 1],params_guess,0);
@@ -240,12 +239,25 @@ summary_table = table(est_names, true_values, round(est_values,3), round(est_std
 
 disp(summary_table);
 
-%%
-figure()
-compare(chirp_data.med, grey_nonlin_est_model)
+%% Cross Validation on Untrained Datasets
 
 figure()
-compare(chirp_data.low, grey_nonlin_est_model)
+compare(step_data.low, grey_nonlin_est_model)
+title('Low Volt Step Input Cross Validation')
+xlabel('Time (s)')
+ylabel('Angular Velocity (rad/s)')
+legend('0.5V Step Exp Data', 'Nonlinear Grey Model Estimation')
+
+figure()
+compare(prbs_data.low, grey_nonlin_est_model)
+title('Low Volt PRBS Input Cross Validation')
+xlabel('Time (s)')
+ylabel('Angular Velocity (rad/s)')
+legend('0.5V PRBS Exp Data', 'Nonlinear Grey Model Estimation')
 
 figure()
 compare(chirp_data.high, grey_nonlin_est_model)
+title('High Volt Chirp Input Cross Validation')
+xlabel('Time (s)')
+ylabel('Angular Velocity (rad/s)')
+legend('6V Chirp Exp Data', 'Nonlinear Grey Model Estimation')
