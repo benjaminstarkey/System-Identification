@@ -187,7 +187,7 @@ for k = 1:length(train_data)
 end
 
 figure
-heatmap(labels, labels, fit_table);
+heatmap(labels, labels, fit_table, 'FontSize', 14);
 colormap(parula)
 clim([0, 100])
 
