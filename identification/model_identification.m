@@ -287,3 +287,30 @@ title('High Volt Chirp Input Cross Validation')
 xlabel('Time (s)')
 ylabel('Angular Velocity (rad/s)')
 legend('6V Chirp Exp Data', 'Nonlinear Grey Model Estimation')
+
+
+%% NLGREY Cross-Val Heatmap
+model_compare = {prbs_data.med, grey_nonlin_est_model};
+input_regime = {step_data.low, chirp_data.med, prbs_data.high};
+
+horz_labels = {'Low Step (0.5V)', 'Medium Chirp (2V)', 'High PRBS (6V)'};
+vert_labels = {'Linear Model (2V PRBS)', 'NL Grey Model'};
+fit_table = zeros(2,3);
+
+tf_lin_model = tfest(model_compare{1}, 2, 0); % train prbs_med TF
+
+for k = 1:length(input_regime)
+    [~, fitval_lin] = compare(input_regime{k}, tf_lin_model); % compare to input_regime
+    [~, fitval_nl] = compare(input_regime{k}, grey_nonlin_est_model);
+
+    fit_table(:, k) = [fitval_lin; fitval_nl]; 
+end
+
+figure
+heatmap(horz_labels, vert_labels, fit_table, 'FontSize', 14);
+colormap(parula)
+clim([0, 100])
+
+title('Linear TF vs. Nonlinear Grey Model Cross Validation')
+xlabel('Input & Operating Regime')
+ylabel('Trained Model')
