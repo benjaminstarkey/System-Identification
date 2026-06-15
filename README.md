@@ -8,6 +8,10 @@ Train 2nd order linear TF with differing voltage regime PRBS signals. Linear mod
 
 LINEAR CROSS VAL HEAT MAP, centered
 
+<p align="center">
+  <img src="figures/Linear_CrossVal_Heatmap.png" width="700">
+</p>
+
 ### Nonlinear Grey Model
 To improve model identification across regimes, a physics-informed nonlinear grey model is developed to train with several input types and voltages across the operating window. Estimates of the motor parameters are directly identified within 25% error on linear terms and 35-50% on nonlinear parameters despite measurement noise.
 
@@ -24,6 +28,14 @@ The cross validation heatmap below shows nonlinear grey model performing signifi
 
 NONLINEAR CROSS VAL HEAT MAP COMPARISON, centered
 
+<p align="center">
+  <img src="figures/Grey_CrossVal_Compare_Heatmap.png" width="700">
+</p>
+
 The nonlinear grey model accurately models the low voltage PRBS signal despite the 7% fit metric, since high frequency, low amplitude voltage switching keeps the motor operating in the stiction deadband and around zero velocity. Measurement noise creates a low SNR and skews the fit metric. At ~9.5s, the model accurately tracks a response where the motor is commanded long enough to break out of the friction regime, validating the model at low voltages despite the 7% fit metric.
 
 LOW PRBS SIGNAL TRACKING 7%, centerd
+
+<p align="center">
+  <img src="figures/Grey_Low_PRBS_Spike.png" width="700">
+</p>
