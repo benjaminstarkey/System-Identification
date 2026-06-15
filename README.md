@@ -1,6 +1,6 @@
 # System-Identification of DC Motor
 ## Project Overview
-Direct experimentation on a given DC motor using a low (0.5V), medium (2V), and high (6V) voltage step, chirp, and PRBS input signal results in angular velocity responses capable of training linear and nonlinear models to identify motor dynamics. Linear models trained on one operating condition fail to generalize to other regions due to nonlinear friction and saturation. Cross validation shows that a physics-backed grey model approach increases accuracy to >90% across all voltage regimes while simultaneously estimating model parameters.
+Direct simulated experimentation on a given DC motor model using a low (0.5V), medium (2V), and high (6V) voltage step, chirp, and PRBS input signal results in angular velocity responses capable of training linear and nonlinear models to identify motor dynamics. Linear models trained on one operating condition fail to generalize to other regions due to nonlinear friction and saturation. Cross validation shows that a physics-backed grey model approach increases accuracy to >90% across all voltage regimes while simultaneously estimating model parameters.
 
 ## Analysis
 ### Linear TF Cross Validation
