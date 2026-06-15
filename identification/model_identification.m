@@ -12,7 +12,7 @@ load prbs.mat
 prbs = data;
 
 
-%% Regime Looping
+%% Data Input Amp and Signal Processing
 names = fieldnames(stepp);
 
 for i = 1:length(names)
@@ -22,7 +22,7 @@ for i = 1:length(names)
     prbs_data.(label) = iddata(prbs.(label).y(:), prbs.(label).u(:), prbs.(label).dt);
 end
 
-%% Select Training Dataset
+%% Select Training Dataset and Generate Models
 disp('Training Models using PRBS 2V Data...')
 z_train = prbs_data.med;
 
@@ -67,7 +67,9 @@ title('Training Data Validity Comparison')
 z_exp_step = step_data.med;
 
 figure
-compare(z_exp_step, trained_models{:});
+opt = compareOptions;
+opt.InitialCondition = 'z';
+compare(z_exp_step, trained_models{:}, opt);
 title('Step Data Validity Comparison')
 
 [~, fit.exp.step] = compare(z_exp_step, trained_models{:});
@@ -82,9 +84,9 @@ title('Chirp Data Validity Comparison')
 [~, fit.exp.chirp] = compare(z_exp_chirp, trained_models{:});
 
 
-%% PRBS Amplitude Nonlinear Analysis
+%% PRBS Amplitude Analysis
 data_sets = {z_train, prbs_data.low, prbs_data.high};
-data_names = ["PRBS 2V (Training)", "PRBS 0.2V", "PRBS 6V"];
+data_names = ["PRBS 2V (Training)", "PRBS 0.5V", "PRBS 6V"];
 
 fit_table = zeros(length(trained_models), length(data_sets));
 
@@ -126,7 +128,7 @@ ylabel('Model Type')
 
 
 
-%% Input Nonlinear Analysis
+%% Input Type Analysis
 data_sets = {z_train, step_data.med, chirp_data.med};
 data_names = ["PRBS 2V (Training)", "Step 2V", "Chirp 2V"];
 
@@ -167,3 +169,148 @@ title('Input Analysis')
 xlabel('Dataset')
 ylabel('Model Type')
 
+%% Operating Regime Cross-Validation Heatmap
+train_data = {prbs_data.low, prbs_data.med, prbs_data.high};
+validation_data = {prbs_data.low, prbs_data.med, prbs_data.high};
+
+labels = {'Low (0.5V)', 'Medium (2V)', 'High (6V)'};
+fit_table = zeros(3,3);
+
+for k = 1:length(train_data)
+    tf_model = tfest(train_data{k}, 2, 0); % train 2nd order TF by input regime
+
+    for m = 1:length(validation_data)
+        [~, fit_val] = compare(validation_data{m}, tf_model); % compare to each data regime
+        fit_table(m, k) = fit_val; 
+    end
+
+end
+
+figure
+heatmap(labels, labels, fit_table, 'FontSize', 14);
+colormap([linspace(0.9, 0.0, 256)', linspace(0.95, 0.2, 256)', linspace(1.0, 0.5, 256)'])
+clim([0, 100])
+
+title('Linear TF Operating Regime Cross-Validation')
+xlabel('Validation Regime')
+ylabel('Training Regime')
+
+
+%% Grey Box Linear Parameter Estimation
+
+% Initial Parameter Guesses [b, J, Kt]
+params_guess = [0.005; 0.01; 0.12];
+params_names = {'b'; 'J'; 'Kt'};
+
+grey_lin_model = idgrey(@motor_grey_model, params_guess, 'c');
+grey_lin_est_model = greyest(z_train, grey_lin_model);
+%%
+[~, grey_fit_val] = compare(prbs_data.high, grey_lin_est_model);
+
+%% Grey Nonlinear Parameter Estimation
+
+z_train = merge(step_data.med, chirp_data.low, prbs_data.med);
+
+
+params_guess = {0.005; 0.01; 0.2; 0.04; 0.045; 0.06};
+params_names = {'b'; 'J'; 'Kt'; 'Fc'; 'Fs'; 'vs'};
+
+grey_nonlin_model = idnlgrey(@motor_grey_nonlin_model,[1 1 1],params_guess,0);
+grey_nonlin_model.Algorithm.Display = 'on';
+
+% Settings to help solver
+grey_nonlin_model.Algorithm.SimulationOptions.Solver = 'ode15s';
+
+grey_nonlin_model.Parameters(1).Name = 'b';
+grey_nonlin_model.Parameters(1).Minimum = 0.0001;
+grey_nonlin_model.Parameters(1).Maximum = 0.01;
+
+grey_nonlin_model.Parameters(2).Name = 'J';
+grey_nonlin_model.Parameters(2).Minimum = 0.001;
+grey_nonlin_model.Parameters(2).Maximum = 0.1;
+
+grey_nonlin_model.Parameters(3).Name = 'Kt';
+grey_nonlin_model.Parameters(3).Minimum = 0.01;
+grey_nonlin_model.Parameters(3).Maximum = 1;
+
+grey_nonlin_model.Parameters(4).Name = 'Fc';
+grey_nonlin_model.Parameters(4).Minimum = 0.001;
+grey_nonlin_model.Parameters(4).Maximum = 0.1;
+
+grey_nonlin_model.Parameters(5).Name = 'Fs';
+grey_nonlin_model.Parameters(5).Minimum = 0.001;
+grey_nonlin_model.Parameters(5).Maximum = 0.1;
+
+grey_nonlin_model.Parameters(6).Name = 'vs';
+grey_nonlin_model.Parameters(6).Minimum = 0.01;
+grey_nonlin_model.Parameters(6).Maximum = 1;
+
+
+
+grey_nonlin_est_model = nlgreyest(z_train, grey_nonlin_model);
+
+%% Parameter Validation Table
+
+est_names = {grey_nonlin_est_model.Parameters.Name}';
+est_values = [grey_nonlin_est_model.Parameters.Value]';
+
+est_cov = grey_nonlin_est_model.Report.Parameters.FreeParCovariance;
+est_stdev = sqrt(diag(est_cov));
+
+true_values = [0.004; 0.012; 0.1; 0.02; 0.035; 0.1];
+percent_error = abs((est_values - true_values) ./ true_values) * 100;
+
+summary_table = table(est_names, true_values, round(est_values,3), round(est_stdev,3), round(percent_error,3), ...
+    'VariableNames', {'Parameter', 'True_Value', 'Identified_Value', 'Std_Deviation', 'Percent_Error'});
+
+disp(summary_table);
+
+%% Cross Validation on Untrained Datasets
+
+figure()
+compare(step_data.low, grey_nonlin_est_model)
+title('Low Volt Step Input Cross Validation')
+xlabel('Time (s)')
+ylabel('Angular Velocity (rad/s)')
+legend('0.5V Step Exp Data', 'Nonlinear Grey Model Estimation')
+
+figure()
+compare(prbs_data.low, grey_nonlin_est_model)
+title('Low Volt PRBS Input Cross Validation')
+xlabel('Time (s)')
+ylabel('Angular Velocity (rad/s)')
+legend('0.5V PRBS Exp Data', 'Nonlinear Grey Model Estimation')
+
+figure()
+compare(chirp_data.high, grey_nonlin_est_model)
+title('High Volt Chirp Input Cross Validation')
+xlabel('Time (s)')
+ylabel('Angular Velocity (rad/s)')
+legend('6V Chirp Exp Data', 'Nonlinear Grey Model Estimation')
+
+
+%% NLGREY Cross-Val Heatmap
+model_compare = {prbs_data.med, grey_nonlin_est_model};
+input_regime = {step_data.low, prbs_data.low, chirp_data.med, prbs_data.high};
+
+horz_labels = {'Low Step (0.5V)', 'Low PRBS (0.5V)', 'Medium Chirp (2V)', 'High PRBS (6V)'};
+vert_labels = {'Linear Model (2V PRBS)', 'NL Grey Model'};
+fit_table = zeros(2,3);
+
+tf_lin_model = tfest(model_compare{1}, 2, 0); % train prbs_med TF
+
+for k = 1:length(input_regime)
+    [~, fitval_lin] = compare(input_regime{k}, tf_lin_model); % compare to input_regime
+    [~, fitval_nl] = compare(input_regime{k}, grey_nonlin_est_model);
+
+    fit_table(:, k) = [fitval_lin; fitval_nl]; 
+end
+
+figure
+heatmap(horz_labels, vert_labels, fit_table, 'FontSize', 14);
+colormap([linspace(0.9, 0.0, 256)', linspace(0.95, 0.2, 256)', linspace(1.0, 0.5, 256)']);
+clim([0, 100])
+
+title('Linear TF vs. Nonlinear Grey Model Cross Validation')
+xlabel('Input & Operating Regime')
+ylabel('Trained Model')

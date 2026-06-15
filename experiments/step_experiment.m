@@ -8,7 +8,7 @@ Tf = 10;
 
 t = 0:dt:Tf;
 
-amps = [0.2, 2, 6];
+amps = [0.5, 2, 6];
 names = ["low", "med", "high"];
 
 data = struct();
@@ -57,7 +57,14 @@ data.(name).amp = amp;
 end
 
 % Data Logging
-save('../data/step.mat', 'data');
+script_dir = fileparts(mfilename('fullpath')); % get current filepath
+target_dir = fullfile(script_dir, '..', 'data'); % go back and into data folder
+
+if ~exist(target_dir, 'dir') % in case folder does not exist already
+    mkdir(target_dir);
+end
+
+save(fullfile(target_dir, 'step.mat'), 'data');
 disp('Logged Step Data')
 
 
